@@ -3,13 +3,15 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+from ui.settings import SettingsDialog
+
 
 def on_status_popup_menu(menu, event_button, event_time):
     menu.popup(None, None, None, menu, event_button, event_time)
 
 
 def show_main_window(menu):
-    mainWindow.show_all()
+    settings_dialog.show_settings_dialog()
 
 
 def on_exit(menu):
@@ -25,16 +27,13 @@ handlers = {
 }
 
 builder = Gtk.Builder()
-builder.add_from_file("ui/main.glade")
 builder.add_from_file("ui/status.glade")
 builder.add_from_file("ui/exit_dialog.glade")
 builder.connect_signals(handlers)
 
-mainWindow = builder.get_object("main_window")
+settings_dialog = SettingsDialog()
 tryIcon = builder.get_object("status")
 exit_dialog = builder.get_object("exit_dialog")
-# mainWindow.connect("delete-event", Gtk.main_quit)
-
 
 if __name__ == "__main__":
     Gtk.main()
