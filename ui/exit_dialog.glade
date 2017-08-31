@@ -4,9 +4,9 @@
   <requires lib="gtk+" version="3.12"/>
   <object class="GtkDialog" id="exit_dialog">
     <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="type_hint">dialog</property>
-    <signal name="response" handler="on_exit_dialog_response" object="response_action" swapped="no"/>
-    <signal name="response" handler="on_exit_dialog_response" object="response_action" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox1">
         <property name="can_focus">False</property>
@@ -69,7 +69,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry1">
+              <object class="GtkEntry" id="login_field">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -92,9 +92,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry2">
+              <object class="GtkEntry" id="password_field">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="visibility">False</property>
+                <property name="input_purpose">password</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -112,12 +114,8 @@
       </object>
     </child>
     <action-widgets>
-      <!--See Gtk.ResponseType.OK -->
       <action-widget response="-5">ok_button</action-widget>
       <action-widget response="-4">cancel_button</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkAction" id="response_action">
-    <signal name="activate" handler="on_exit_dialog_response" object="cancel_button" swapped="no"/>
   </object>
 </interface>

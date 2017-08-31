@@ -20,31 +20,18 @@ def on_about_dialog(item):
 
 
 class SettingsDialog:
-    _builder = Gtk.Builder()
-    _builder.add_from_file("ui/main.glade")
-    _mainWindow = _builder.get_object("main_window")
-    # init ui elements
-    _cancel_button = _builder.get_object("cancel_button")
-    _apply_button = _builder.get_object("apply_button")
-    _exit_menu_item = _builder.get_object("exit_menu_item")
-    _about_menu_item = _builder.get_object("about_menu_item")
-    _session_duration = _builder.get_object("session_duration")
-    _pause_between_sessions = _builder.get_object("pause_between_sessions")
-
-    handlers = {
-        "on_about_menu_item_activate": on_about_dialog
-    }
-
-    _builder.connect_signals(handlers)
-
     def __init__(self):
+        self._init_ui()
         self._init_users_box()
-
-    def show_settings_dialog(self):
-        self._mainWindow.show()
+        self.response = self._main_dialog.run()
+        if self.response == Gtk.ResponseType.OK:
+            print("The Apply was clicked")
+        else:
+            print("The Cancel was clicked")
+            self._main_dialog.destroy()
 
     def hide_settings_dialog(self):
-        self._mainWindow.hide()
+        self._main_dialog.hide()
 
     def _init_users_box(self):
         users = get_users_list()
@@ -59,6 +46,24 @@ class SettingsDialog:
         cell = Gtk.CellRendererText()
         self.users_box.pack_start(cell, True)
         self.users_box.add_attribute(cell, "text", 0)
+
+    def _init_ui(self):
+        self._builder = Gtk.Builder()
+        self._builder.add_from_file("ui/main.glade")
+        self._main_dialog = self._builder.get_object("main_dialog")
+        # init ui elements
+        self._cancel_button = self._builder.get_object("cancel_button")
+        self._apply_button = self._builder.get_object("apply_button")
+        self._exit_menu_item = self._builder.get_object("exit_menu_item")
+        self._about_menu_item = self._builder.get_object("about_menu_item")
+        self._session_duration = self._builder.get_object("session_duration")
+        self._pause_between_sessions = self._builder.get_object("pause_between_sessions")
+
+        handlers = {
+            "on_about_menu_item_activate": on_about_dialog
+        }
+
+        self._builder.connect_signals(handlers)
 
 
 if __name__ == "__main__":
