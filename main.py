@@ -11,16 +11,21 @@ def on_status_popup_menu(menu, event_button, event_time):
 
 
 def show_settings_dialog(menu):
-    SettingsDialog()
+    if check_permissions():
+        SettingsDialog()
 
 
 def on_exit(menu):
+    if check_permissions():
+        print("PASS")
+        Gtk.main_quit()
+
+
+def check_permissions():
     out = subprocess.getoutput("gksu -m 'ChildController' 'ls'")
     # Current file name
     res = __file__.split("/")[-1:][0]
-    if res in out:
-        print("PASS")
-        Gtk.main_quit()
+    return res in out
 
 
 handlers = {

@@ -150,8 +150,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton1">
-                        <property name="label" translatable="yes">Su</property>
+                      <object class="GtkCheckButton" id="sun_check_button">
+                        <property name="label" translatable="yes">Sun</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -170,6 +170,7 @@
                       <object class="GtkSpinButton" id="spinbutton1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="max_width_chars">0</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -189,8 +190,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton3">
-                        <property name="label" translatable="yes">Mo</property>
+                      <object class="GtkCheckButton" id="mon_check_button">
+                        <property name="label" translatable="yes">Mon</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -228,8 +229,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton4">
-                        <property name="label" translatable="yes">Tu</property>
+                      <object class="GtkCheckButton" id="tue_check_button">
+                        <property name="label" translatable="yes">Tue</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -267,8 +268,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton5">
-                        <property name="label" translatable="yes">We</property>
+                      <object class="GtkCheckButton" id="wed_check_button">
+                        <property name="label" translatable="yes">Wed</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -306,8 +307,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton6">
-                        <property name="label" translatable="yes">Th</property>
+                      <object class="GtkCheckButton" id="thu_check_button">
+                        <property name="label" translatable="yes">Thu</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -345,8 +346,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton7">
-                        <property name="label" translatable="yes">Fr</property>
+                      <object class="GtkCheckButton" id="fri_check_button">
+                        <property name="label" translatable="yes">Fri</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -384,8 +385,8 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkbutton8">
-                        <property name="label" translatable="yes">Sa</property>
+                      <object class="GtkCheckButton" id="sat_check_button">
+                        <property name="label" translatable="yes">Sat</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
