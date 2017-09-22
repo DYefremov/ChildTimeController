@@ -2,7 +2,9 @@ import os
 import pickle
 import pwd
 from enum import Enum
+import gi
 
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 
@@ -47,21 +49,28 @@ class User:
 
 
 class ActiveDay:
-    __slots__ = ["_day", "_time", "_timeout"]
+    __slots__ = ["_day", "_time", "_session_duration", "_timeout"]
 
-    def __init__(self, day, time, timeout):
+    def __init__(self, day, time, session_duration, timeout):
         self._day = day
         self._time = time
+        self._session_duration = session_duration
         self._timeout = timeout
 
     def __repr__(self):
-        return str("Day = " + self._day) + " Time = " + str(self._time) + " Timeout = " + str(self._timeout)
+        return str("Day = " + self._day) + \
+               " Time = " + str(self._time) + \
+               " Session_duration = " + str(self._session_duration) + \
+               " Timeout = " + str(self._timeout)
 
     def get_day(self):
         return self._day
 
     def get_time(self):
         return self._time
+
+    def get_session_duration(self):
+        return self._session_duration
 
     def get_timeout(self):
         return self._timeout
@@ -81,7 +90,7 @@ def get_default_settings():
     user_name = pwd.getpwuid(os.geteuid()).pw_name
     active_days = []
     for i in range(7):
-        active_days.append(ActiveDay(Day(i).name, 2, 5))
+        active_days.append(ActiveDay(Day(i).name, 2, 0.5, 5))
     return User(user_name, active_days, True)
 
 
@@ -150,11 +159,16 @@ class SettingsDialog:
         self._session_duration = self._builder.get_object("session_duration")
         self._pause_between_sessions = self._builder.get_object("pause_between_sessions")
         self._auto_start = self._builder.get_object("auto_start")
+        self._active_days = [self._builder.get_object("sun_box"), self._builder.get_object("mon_box"),
+                             self._builder.get_object("tue_box"), self._builder.get_object("wed_box"),
+                             self._builder.get_object("thu_box"), self._builder.get_object("fri_box"),
+                             self._builder.get_object("sat_box")]
 
         handlers = {
             "on_about_menu_item_activate": on_about_dialog,
             "on_users_box_changed": self.on_users_box_changed,
-            "on_apply_button_clicked": self.on_apply_button_clicked
+            "on_apply_button_clicked": self.on_apply_button_clicked,
+            "on_close_menu_item_activate": lambda *args: self._main_dialog.destroy()
         }
 
         self._builder.connect_signals(handlers)
@@ -171,10 +185,7 @@ class SettingsDialog:
     def on_apply_button_clicked(self, *args):
         if is_confirmed():
             user_name = self.get_current_user_name()
-            active_days = []
-            for i in range(7):
-                active_days.append(ActiveDay(Day(i).name, 2, 5))
-            write_settings(User(user_name, active_days, self._auto_start.get_active()))
+            write_settings(User(user_name, self.get_active_days(), self._auto_start.get_active()))
             print(read_settings())
 
     def get_current_user_name(self):
@@ -185,6 +196,17 @@ class SettingsDialog:
             print(model[tr_iter][0])
             return model[tr_iter][0]
         return ""
+
+    def get_active_days(self):
+        active_days = []
+        for box in self._active_days:
+            day = box.get_children()[0]
+            if day.get_active():
+                time = box.get_children()[1].get_value_as_int()
+                duration = self._session_duration.get_value()
+                timeout = self._pause_between_sessions.get_value_as_int()
+                active_days.append(ActiveDay(day.get_label(), time, duration, timeout))
+        return active_days
 
 
 if __name__ == "__main__":

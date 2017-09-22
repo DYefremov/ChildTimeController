@@ -1,9 +1,6 @@
-import gi
 import subprocess
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 from ui.settings import SettingsDialog
+from gi.repository import Gtk
 
 
 def on_status_popup_menu(menu, event_button, event_time):

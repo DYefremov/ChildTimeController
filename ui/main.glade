@@ -9,7 +9,7 @@
     <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox1">
+      <object class="GtkBox" id="dialog_vbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child internal-child="action_area">
@@ -72,12 +72,13 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkImageMenuItem" id="imagemenuitem5">
-                            <property name="label">gtk-quit</property>
+                          <object class="GtkImageMenuItem" id="exit_menu_item">
+                            <property name="label">gtk-close</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_close_menu_item_activate" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -142,14 +143,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkGrid" id="grid1">
+              <object class="GtkGrid" id="grid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
                 <property name="column_spacing">5</property>
                 <child>
-                  <object class="GtkBox" id="box4">
+                  <object class="GtkBox" id="sun_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -192,7 +193,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box5">
+                  <object class="GtkBox" id="mon_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -233,7 +234,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box6">
+                  <object class="GtkBox" id="tue_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -274,7 +275,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box7">
+                  <object class="GtkBox" id="wed_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -315,7 +316,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box8">
+                  <object class="GtkBox" id="thu_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -356,7 +357,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box9">
+                  <object class="GtkBox" id="fri_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -397,7 +398,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box10">
+                  <object class="GtkBox" id="sat_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
