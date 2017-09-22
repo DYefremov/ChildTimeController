@@ -1,8 +1,17 @@
+import os
 import pickle
 import pwd
 from enum import Enum
 
 from gi.repository import Gtk
+
+
+class Constants(Enum):
+    """For constants """
+    PATH = "settings.cfg"
+
+
+PATH = Constants.PATH.value
 
 
 class Day(Enum):
@@ -23,6 +32,10 @@ class User:
         self._active_days = active_days
         self._auto_start = auto_start
 
+    def __repr__(self):
+        return "User name = " + self._name + "\nActive days = " + str(self._active_days) + "\nAuto start = " + str(
+            self._auto_start)
+
     def get_name(self):
         return self._name
 
@@ -41,6 +54,9 @@ class ActiveDay:
         self._time = time
         self._timeout = timeout
 
+    def __repr__(self):
+        return str("Day = " + self._day) + " Time = " + str(self._time) + " Timeout = " + str(self._timeout)
+
     def get_day(self):
         return self._day
 
@@ -51,14 +67,22 @@ class ActiveDay:
         return self._timeout
 
 
-def write_settings(data, path):
-    with open(path, "wb") as file:
+def write_settings(data):
+    with open(PATH, "wb") as file:
         pickle.dump(data, file)
 
 
-def read_settings(path):
-    with open(path, "rb") as file:
+def read_settings():
+    with open(PATH, "rb") as file:
         return pickle.load(file)
+
+
+def get_default_settings():
+    user_name = pwd.getpwuid(os.geteuid()).pw_name
+    active_days = []
+    for i in range(7):
+        active_days.append(ActiveDay(Day(i).name, 2, 5))
+    return User(user_name, active_days, True)
 
 
 def get_users_list():
@@ -89,21 +113,20 @@ def is_confirmed():
 
 class SettingsDialog:
     def __init__(self):
+        # check whether a file exists and write default
+        if not os.path.exists(PATH):
+            write_settings(get_default_settings())
         self._init_ui()
         self._init_users_box()
         self.response = self._main_dialog.run()
-        if self.response == Gtk.ResponseType.OK and is_confirmed():
-            print("The Apply was clicked")
-        else:
-            print("The Cancel was clicked")
-            self._main_dialog.destroy()
+        self._main_dialog.destroy()
 
     def hide_settings_dialog(self):
         self._main_dialog.hide()
 
     def _init_users_box(self):
         users_list = get_users_list()
-        self.users_box = self._builder.get_object("usersBox")
+        self.users_box = self._builder.get_object("users_box")
         self.list = Gtk.ListStore(str)
 
         for u in users_list:
@@ -126,12 +149,42 @@ class SettingsDialog:
         self._about_menu_item = self._builder.get_object("about_menu_item")
         self._session_duration = self._builder.get_object("session_duration")
         self._pause_between_sessions = self._builder.get_object("pause_between_sessions")
+        self._auto_start = self._builder.get_object("auto_start")
 
         handlers = {
-            "on_about_menu_item_activate": on_about_dialog
+            "on_about_menu_item_activate": on_about_dialog,
+            "on_users_box_changed": self.on_users_box_changed,
+            "on_apply_button_clicked": self.on_apply_button_clicked
         }
 
         self._builder.connect_signals(handlers)
+
+    def get_settings(self):
+        pass
+
+    def set_settings(self):
+        pass
+
+    def on_users_box_changed(self, *args):
+        return self.get_current_user_name()
+
+    def on_apply_button_clicked(self, *args):
+        if is_confirmed():
+            user_name = self.get_current_user_name()
+            active_days = []
+            for i in range(7):
+                active_days.append(ActiveDay(Day(i).name, 2, 5))
+            write_settings(User(user_name, active_days, self._auto_start.get_active()))
+            print(read_settings())
+
+    def get_current_user_name(self):
+        """ Get current selected user name """
+        tr_iter = self.users_box.get_active_iter()
+        if tr_iter is not None:
+            model = self.users_box.get_model()
+            print(model[tr_iter][0])
+            return model[tr_iter][0]
+        return ""
 
 
 if __name__ == "__main__":
