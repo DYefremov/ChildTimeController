@@ -38,6 +38,9 @@ def write_settings(data):
 
 
 def read_settings():
+    # check whether a file exists and write default
+    if not os.path.exists(PATH):
+        write_settings(get_default_settings())
     with open(PATH, "rb") as file:
         return pickle.load(file)
 
@@ -78,9 +81,6 @@ def is_confirmed():
 
 class SettingsDialog:
     def __init__(self):
-        # check whether a file exists and write default
-        if not os.path.exists(PATH):
-            write_settings(get_default_settings())
         self._init_ui()
         self._init_users_box()
         self.response = self._main_dialog.run()
@@ -161,7 +161,6 @@ class SettingsDialog:
         tr_iter = self.users_box.get_active_iter()
         if tr_iter is not None:
             model = self.users_box.get_model()
-            print(model[tr_iter][0])
             return model[tr_iter][0]
         return ""
 
@@ -171,8 +170,6 @@ class SettingsDialog:
             day = box.get_children()[0]
             if day.get_active():
                 time = box.get_children()[1].get_value_as_int()
-                # duration = self._session_duration.get_value()
-                # timeout = self._pause_between_sessions.get_value_as_int()
                 active_days.append(ActiveDay(Day(index), time))
         return active_days
 
