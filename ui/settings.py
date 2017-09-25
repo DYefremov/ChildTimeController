@@ -1,7 +1,9 @@
 import os
 import pickle
 import pwd
+from collections import namedtuple
 from enum import Enum
+
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -15,6 +17,10 @@ class Constants(Enum):
 
 PATH = Constants.PATH.value
 
+User = namedtuple("User", ["name", "active_days", "session_duration", "timeout", "auto_start"])
+
+ActiveDay = namedtuple("ActiveDay", ["day", "time"])
+
 
 class Day(Enum):
     Sun = 0
@@ -24,56 +30,6 @@ class Day(Enum):
     Thu = 4
     Fri = 5
     Sat = 6
-
-
-class User:
-    __slots__ = ["_name", "_active_days", "_auto_start"]
-
-    def __init__(self, name, active_days, auto_start):
-        self._name = name
-        self._active_days = active_days
-        self._auto_start = auto_start
-
-    def __repr__(self):
-        return "User name = " + self._name + "\nActive days = " + str(self._active_days) + "\nAuto start = " + str(
-            self._auto_start)
-
-    def get_name(self):
-        return self._name
-
-    def get_active_days(self):
-        return self._active_days
-
-    def is_auto_start(self):
-        return self._auto_start
-
-
-class ActiveDay:
-    __slots__ = ["_day", "_time", "_session_duration", "_timeout"]
-
-    def __init__(self, day, time, session_duration, timeout):
-        self._day = day
-        self._time = time
-        self._session_duration = session_duration
-        self._timeout = timeout
-
-    def __repr__(self):
-        return str("Day = " + self._day) + \
-               " Time = " + str(self._time) + \
-               " Session_duration = " + str(self._session_duration) + \
-               " Timeout = " + str(self._timeout)
-
-    def get_day(self):
-        return self._day
-
-    def get_time(self):
-        return self._time
-
-    def get_session_duration(self):
-        return self._session_duration
-
-    def get_timeout(self):
-        return self._timeout
 
 
 def write_settings(data):
@@ -90,8 +46,8 @@ def get_default_settings():
     user_name = pwd.getpwuid(os.geteuid()).pw_name
     active_days = []
     for i in range(7):
-        active_days.append(ActiveDay(Day(i).name, 2, 0.5, 5))
-    return User(user_name, active_days, True)
+        active_days.append(ActiveDay(Day(i), 2))
+    return User(user_name, active_days, 30, 15, False)
 
 
 def get_users_list():
@@ -172,20 +128,32 @@ class SettingsDialog:
         }
 
         self._builder.connect_signals(handlers)
+        self.set_settings()
 
     def get_settings(self):
         pass
 
     def set_settings(self):
-        pass
+        settings = read_settings()
+        self._auto_start.set_active(settings.auto_start)
+        self._session_duration.set_value(settings.session_duration)
+        self._pause_between_sessions.set_value(settings.timeout)
+        for d in settings.active_days:
+            box = self._active_days[d.day.value]
+            box.get_children()[0].set_active(True)
+            button = box.get_children()[1]
+            button.set_value(d.time)
 
     def on_users_box_changed(self, *args):
         return self.get_current_user_name()
 
     def on_apply_button_clicked(self, *args):
         if is_confirmed():
-            user_name = self.get_current_user_name()
-            write_settings(User(user_name, self.get_active_days(), self._auto_start.get_active()))
+            write_settings(User(self.get_current_user_name(),
+                                self.get_active_days(),
+                                self._session_duration.get_value(),
+                                self._pause_between_sessions.get_value(),
+                                self._auto_start.get_active()))
             print(read_settings())
 
     def get_current_user_name(self):
@@ -199,13 +167,13 @@ class SettingsDialog:
 
     def get_active_days(self):
         active_days = []
-        for box in self._active_days:
+        for index, box in enumerate(self._active_days):
             day = box.get_children()[0]
             if day.get_active():
                 time = box.get_children()[1].get_value_as_int()
-                duration = self._session_duration.get_value()
-                timeout = self._pause_between_sessions.get_value_as_int()
-                active_days.append(ActiveDay(day.get_label(), time, duration, timeout))
+                # duration = self._session_duration.get_value()
+                # timeout = self._pause_between_sessions.get_value_as_int()
+                active_days.append(ActiveDay(Day(index), time))
         return active_days
 
 
