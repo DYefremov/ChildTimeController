@@ -2,10 +2,11 @@ import datetime
 import subprocess
 import threading
 import time
-
-from gi.repository import Gtk
-
 import ui.settings as settings
+import gi
+
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 
 class TimeService(threading.Thread):
@@ -25,8 +26,9 @@ class TimeService(threading.Thread):
                 print(self.total_time)
                 time.sleep(timeout)
                 self.total_time -= timeout
-        print("Done!\n")
-        print("Total", self.total_time)
+                if self.total_time > self._durations[0] * 5:
+                    tryIcon.set_from_icon_name("face-angry")
+        tryIcon.set_from_icon_name("face-raspberry")
 
 
 def on_status_popup_menu(menu, event_button, event_time):
@@ -75,8 +77,9 @@ handlers = {
 builder = Gtk.Builder()
 builder.add_from_file("ui/status.glade")
 builder.connect_signals(handlers)
-tryIcon = builder.get_object("status")
+tryIcon = builder.get_object("status_icon")
 builder.connect_signals(handlers)
+
 
 if __name__ == "__main__":
     init_service()
