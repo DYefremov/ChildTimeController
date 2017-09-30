@@ -16,19 +16,19 @@ class TimeService(threading.Thread):
         self.total_time = 0
 
     def run(self):
-        start_time = datetime.datetime.now().timestamp()
+        start_time = time.time()
         session_duration = self._durations[1]
         timeout = self._durations[2]
         while self.total_time < self._durations[0] * 10:
             time.sleep(1)
-            if datetime.datetime.now().timestamp() - start_time > session_duration:
-                self.total_time += datetime.datetime.now().timestamp() - start_time
-                print(self.total_time)
+            if time.time() - start_time > session_duration:
+                self.total_time += time.time() - start_time
                 time.sleep(timeout)
                 self.total_time -= timeout
                 if self.total_time > self._durations[0] * 5:
                     tryIcon.set_from_icon_name("face-angry")
         tryIcon.set_from_icon_name("face-raspberry")
+        print(self.total_time)
 
 
 def on_status_popup_menu(menu, event_button, event_time):
