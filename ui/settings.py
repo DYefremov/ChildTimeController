@@ -61,18 +61,18 @@ def get_users_list():
     return users_list
 
 
-def on_about_dialog(item):
+def on_about_dialog(*args):
     builder = Gtk.Builder()
-    builder.add_from_file("ui/about_dialog.glade")
+    builder.add_from_file("ui/main.glade")
     dialog = builder.get_object("about_dialog")
     dialog.run()
-    dialog.hide()
+    dialog.destroy()
 
 
 def is_confirmed():
     """Shows confirmation dialog"""
     builder = Gtk.Builder()
-    builder.add_from_file("ui/confirmation_dialog.glade")
+    builder.add_from_file("ui/main.glade")
     dialog = builder.get_object("confirmation_dialog")
     confirm = dialog.run() == Gtk.ResponseType.OK
     dialog.destroy()
@@ -83,8 +83,7 @@ class SettingsDialog:
     def __init__(self):
         self._init_ui()
         self._init_users_box()
-        self.response = self._main_dialog.run()
-        self._main_dialog.destroy()
+        self.response = self._main_dialog.show_all()
 
     def hide_settings_dialog(self):
         self._main_dialog.hide()
@@ -106,12 +105,10 @@ class SettingsDialog:
     def _init_ui(self):
         self._builder = Gtk.Builder()
         self._builder.add_from_file("ui/main.glade")
-        self._main_dialog = self._builder.get_object("main_dialog")
+        self._main_dialog = self._builder.get_object("main_window")
         # init ui elements
-        self._cancel_button = self._builder.get_object("cancel_button")
-        self._apply_button = self._builder.get_object("apply_button")
-        self._exit_menu_item = self._builder.get_object("exit_menu_item")
-        self._about_menu_item = self._builder.get_object("about_menu_item")
+        self._main_box = self._builder.get_object("main_box")
+        self._data_box = self._builder.get_object("main_box")
         self._session_duration = self._builder.get_object("session_duration")
         self._pause_between_sessions = self._builder.get_object("pause_between_sessions")
         self._auto_start = self._builder.get_object("auto_start")
@@ -119,12 +116,11 @@ class SettingsDialog:
                              self._builder.get_object("tue_box"), self._builder.get_object("wed_box"),
                              self._builder.get_object("thu_box"), self._builder.get_object("fri_box"),
                              self._builder.get_object("sat_box")]
-
         handlers = {
             "on_about_menu_item_activate": on_about_dialog,
             "on_users_box_changed": self.on_users_box_changed,
             "on_apply_button_clicked": self.on_apply_button_clicked,
-            "on_close_menu_item_activate": lambda *args: self._main_dialog.destroy()
+            "on_close_clicked": lambda *args: self._main_dialog.destroy()
         }
 
         self._builder.connect_signals(handlers)
@@ -145,7 +141,12 @@ class SettingsDialog:
             button.set_value(d.time)
 
     def on_users_box_changed(self, *args):
-        return self.get_current_user_name()
+        name = self.get_current_user_name()
+        # if name == "user":
+        #     self._main_box.remove(self._data_box)
+        # else:
+        #     self._main_box.pack_start(self._data_box, True, True, 2)
+        return name
 
     def on_apply_button_clicked(self, *args):
         if is_confirmed():

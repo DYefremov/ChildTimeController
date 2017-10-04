@@ -2,9 +2,8 @@ import datetime
 import subprocess
 import threading
 import time
-import ui.settings as settings
 import gi
-
+import ui.settings as settings
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -79,7 +78,6 @@ builder.add_from_file("ui/status.glade")
 builder.connect_signals(handlers)
 tryIcon = builder.get_object("status_icon")
 builder.connect_signals(handlers)
-
 
 if __name__ == "__main__":
     init_service()
