@@ -1,82 +1,36 @@
-import os
-import pickle
-import pwd
-from collections import namedtuple
-from enum import Enum
+import datetime
+import subprocess
+import threading
+import time
 
-import gi
-
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from usr.share.childtimecontroller.settings import get_users_list, read_settings, write_settings, User, ActiveDay, Day
+from . import Gtk
 
 
-class Constants(Enum):
-    """For constants """
-    PATH = "settings.cfg"
+class StatusIcon:
+    def __init__(self):
+        handlers = {
+            "status_popup_menu": self.on_status_popup_menu,
+            "on_show_item": self.show_settings_dialog,
+            "on_exit_item": self.on_exit,
+        }
 
+        builder = Gtk.Builder()
+        builder.add_from_file("ui/status.glade")
+        builder.connect_signals(handlers)
+        self.try_icon = builder.get_object("status_icon")
 
-PATH = Constants.PATH.value
+    def on_status_popup_menu(self, menu, event_button, event_time):
+        menu.popup(None, None, None, menu, event_button, event_time)
 
-User = namedtuple("User", ["name", "active_days", "session_duration", "timeout", "auto_start"])
+    def show_settings_dialog(self, item):
+        # if check_permissions():
+        SettingsDialog()
 
-ActiveDay = namedtuple("ActiveDay", ["day", "time"])
-
-
-class Day(Enum):
-    Sun = 0
-    Mon = 1
-    Tue = 2
-    Wed = 3
-    Thu = 4
-    Fri = 5
-    Sat = 6
-
-
-def write_settings(data):
-    with open(PATH, "wb") as file:
-        pickle.dump(data, file)
-
-
-def read_settings():
-    # check whether a file exists and write default
-    if not os.path.exists(PATH):
-        write_settings(get_default_settings())
-    with open(PATH, "rb") as file:
-        return pickle.load(file)
-
-
-def get_default_settings():
-    user_name = pwd.getpwuid(os.geteuid()).pw_name
-    active_days = []
-    for i in range(7):
-        active_days.append(ActiveDay(Day(i), 2))
-    return User(user_name, active_days, 30, 15, False)
-
-
-def get_users_list():
-    users_list = []
-    for p in pwd.getpwall():
-        if p[5].startswith("/home/") and p[6] != "/bin/false":
-            users_list.append(p[0])
-    return users_list
-
-
-def on_about_dialog(*args):
-    builder = Gtk.Builder()
-    builder.add_from_file("ui/main.glade")
-    dialog = builder.get_object("about_dialog")
-    dialog.run()
-    dialog.destroy()
-
-
-def is_confirmed():
-    """Shows confirmation dialog"""
-    builder = Gtk.Builder()
-    builder.add_from_file("ui/main.glade")
-    dialog = builder.get_object("confirmation_dialog")
-    confirm = dialog.run() == Gtk.ResponseType.OK
-    dialog.destroy()
-    return confirm
+    def on_exit(self, item):
+        # if check_permissions():
+        #     print("PASS")
+        Gtk.main_quit()
 
 
 class SettingsDialog:
@@ -173,6 +127,74 @@ class SettingsDialog:
                 time = box.get_children()[1].get_value_as_int()
                 active_days.append(ActiveDay(Day(index), time))
         return active_days
+
+
+def on_about_dialog(*args):
+    builder = Gtk.Builder()
+    builder.add_from_file("ui/main.glade")
+    dialog = builder.get_object("about_dialog")
+    dialog.run()
+    dialog.destroy()
+
+
+def is_confirmed():
+    """Shows confirmation dialog"""
+    builder = Gtk.Builder()
+    builder.add_from_file("ui/main.glade")
+    dialog = builder.get_object("confirmation_dialog")
+    confirm = dialog.run() == Gtk.ResponseType.OK
+    dialog.destroy()
+    return confirm
+
+
+def check_permissions():
+    out = subprocess.getoutput("gksu -m 'ChildController' 'ls'")
+    # Current file name
+    res = __file__.split("/")[-1:][0]
+    return res in out
+
+
+class TimeService(threading.Thread):
+    def __init__(self, durations):
+        super(TimeService, self).__init__()
+        self._durations = durations
+        self.total_time = 0
+
+    def run(self):
+        start_time = time.time()
+        session_duration = self._durations[1]
+        timeout = self._durations[2]
+        while self.total_time < self._durations[0] * 10:
+            time.sleep(1)
+            if time.time() - start_time > session_duration:
+                self.total_time += time.time() - start_time
+                time.sleep(timeout)
+                self.total_time -= timeout
+                if self.total_time > self._durations[0] * 5:
+                    pass
+                    # tryIcon.set_from_icon_name("face-angry")
+        # tryIcon.set_from_icon_name("face-raspberry")
+        print(self.total_time)
+
+
+def init_service():
+    """ Initialize main service """
+    st = read_settings()
+    for d in st.active_days:
+        if d.day == Day(datetime.datetime.now().weekday()):
+            start_time_service(d.time, st.session_duration, st.timeout)
+
+
+def start_time_service(*args):
+    """ Starts tracks time service. """
+    service = TimeService(args)
+    service.start()
+    print(args)
+
+
+def start_ui():
+    StatusIcon()
+    Gtk.main()
 
 
 if __name__ == "__main__":
