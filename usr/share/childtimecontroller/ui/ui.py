@@ -37,39 +37,27 @@ class SettingsDialog:
     def __init__(self):
         self._init_ui()
         self._init_users_box()
-        self.response = self._main_dialog.show_all()
+        self._main_dialog.show()
 
     def hide_settings_dialog(self):
         self._main_dialog.hide()
 
-    def _init_users_box(self):
-        users_list = get_users_list()
-        self.users_box = self._builder.get_object("users_box")
-        self.list = Gtk.ListStore(str)
-
-        for u in users_list:
-            self.list.append([u])
-
-        self.users_box.set_model(self.list)
-        self.users_box.set_active(0)
-        cell = Gtk.CellRendererText()
-        self.users_box.pack_start(cell, True)
-        self.users_box.add_attribute(cell, "text", 0)
-
     def _init_ui(self):
-        self._builder = Gtk.Builder()
-        self._builder.add_from_file("ui/main.glade")
-        self._main_dialog = self._builder.get_object("main_window")
+        builder = Gtk.Builder()
+        builder.add_from_file("ui/main.glade")
+        self._main_dialog = builder.get_object("main_window")
         # init ui elements
-        self._main_box = self._builder.get_object("main_box")
-        self._data_box = self._builder.get_object("main_box")
-        self._session_duration = self._builder.get_object("session_duration")
-        self._pause_between_sessions = self._builder.get_object("pause_between_sessions")
-        self._auto_start = self._builder.get_object("auto_start")
-        self._active_days = [self._builder.get_object("sun_box"), self._builder.get_object("mon_box"),
-                             self._builder.get_object("tue_box"), self._builder.get_object("wed_box"),
-                             self._builder.get_object("thu_box"), self._builder.get_object("fri_box"),
-                             self._builder.get_object("sat_box")]
+        self._users_box = builder.get_object("users_box")
+        self._users_list_store = builder.get_object("users_list_store")
+        self._main_box = builder.get_object("main_box")
+        self._data_box = builder.get_object("data_box")
+        self._session_duration = builder.get_object("session_duration")
+        self._pause_between_sessions = builder.get_object("pause_between_sessions")
+        self._auto_start = builder.get_object("auto_start")
+        self._active_days = [builder.get_object("sun_box"), builder.get_object("mon_box"),
+                             builder.get_object("tue_box"), builder.get_object("wed_box"),
+                             builder.get_object("thu_box"), builder.get_object("fri_box"),
+                             builder.get_object("sat_box")]
         handlers = {
             "on_about_menu_item_activate": on_about_dialog,
             "on_users_box_changed": self.on_users_box_changed,
@@ -77,8 +65,13 @@ class SettingsDialog:
             "on_close_clicked": lambda *args: self._main_dialog.destroy()
         }
 
-        self._builder.connect_signals(handlers)
+        builder.connect_signals(handlers)
         self.set_settings()
+
+    def _init_users_box(self):
+        users_list = get_users_list()
+        for u in users_list:
+            self._users_list_store.append([u])
 
     def get_settings(self):
         pass
@@ -95,12 +88,10 @@ class SettingsDialog:
             button.set_value(d.time)
 
     def on_users_box_changed(self, *args):
-        name = self.get_current_user_name()
-        # if name == "user":
-        #     self._main_box.remove(self._data_box)
-        # else:
-        #     self._main_box.pack_start(self._data_box, True, True, 2)
-        return name
+        print(self.get_current_user_name())
+
+    def get_current_user_name(self):
+        return self._users_list_store.get_value(self._users_box.get_active_iter(), 0)
 
     def on_apply_button_clicked(self, *args):
         if is_confirmed():
@@ -110,14 +101,6 @@ class SettingsDialog:
                                 self._pause_between_sessions.get_value(),
                                 self._auto_start.get_active()))
             print(read_settings())
-
-    def get_current_user_name(self):
-        """ Get current selected user name """
-        tr_iter = self.users_box.get_active_iter()
-        if tr_iter is not None:
-            model = self.users_box.get_model()
-            return model[tr_iter][0]
-        return ""
 
     def get_active_days(self):
         active_days = []
