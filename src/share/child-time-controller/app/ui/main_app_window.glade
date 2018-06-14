@@ -34,6 +34,17 @@
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="duration_adjustment">
+    <property name="upper">60</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkEntryCompletion" id="entrycompletion1"/>
+  <object class="GtkAdjustment" id="fri_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkApplicationWindow" id="lock_window">
     <property name="can_focus">False</property>
     <signal name="delete-event" handler="on_lock_exit" swapped="no"/>
@@ -100,6 +111,21 @@
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="mon_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="pause_adjustment">
+    <property name="upper">60</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="sat_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkStatusIcon" id="status_icon">
     <property name="icon_name">face-monkey</property>
     <signal name="popup-menu" handler="on_status_icon_popup_menu" object="status_icon_menu" swapped="no"/>
@@ -134,11 +160,31 @@
       </object>
     </child>
   </object>
+  <object class="GtkAdjustment" id="sun_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="thu_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="tue_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkListStore" id="users_list_store">
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkAdjustment" id="wed_adjustment">
+    <property name="upper">24</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
   <object class="GtkApplicationWindow" id="main_app_window">
     <property name="can_focus">False</property>
@@ -185,6 +231,7 @@
                 <property name="can_focus">False</property>
                 <property name="model">users_list_store</property>
                 <property name="id_column">0</property>
+                <signal name="changed" handler="on_user_changed" swapped="no"/>
                 <child>
                   <object class="GtkCellRendererText" id="user_name_cellrenderertext"/>
                   <attributes>
@@ -274,9 +321,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton1">
+                      <object class="GtkSpinButton" id="mon_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">mon_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -284,9 +332,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton2">
+                      <object class="GtkSpinButton" id="tue_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">tue_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -294,9 +343,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton3">
+                      <object class="GtkSpinButton" id="wed_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">wed_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -304,9 +354,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton4">
+                      <object class="GtkSpinButton" id="thu_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">thu_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -314,9 +365,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton5">
+                      <object class="GtkSpinButton" id="fri_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">fri_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -324,9 +376,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton6">
+                      <object class="GtkSpinButton" id="sat_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">sat_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -334,9 +387,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton7">
+                      <object class="GtkSpinButton" id="sun_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">sun_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -481,9 +535,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton8">
+                      <object class="GtkSpinButton" id="duration_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">duration_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -491,9 +546,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton10">
+                      <object class="GtkSpinButton" id="pause_spin_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">pause_adjustment</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>

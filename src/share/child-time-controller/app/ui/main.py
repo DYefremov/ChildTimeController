@@ -5,7 +5,7 @@ import time
 from threading import Thread
 
 from . import Gtk
-from ..settings import get_users_list
+from ..service.settings import get_config, get_users_list
 
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/child-time-controller/app/ui/"
 
@@ -14,25 +14,31 @@ class MainAppWindow:
 
     def __init__(self):
         handlers = {"on_user_switch_state": self.on_user_switch_state,
+                    "on_user_changed": self.on_user_changed,
                     "on_close_window": self.on_close}
 
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade",
-                                      ("main_app_window", "users_list_store"))
+                                      ("main_app_window", "users_list_store", "mon_adjustment", "tue_adjustment",
+                                       "wed_adjustment", "thu_adjustment", "fri_adjustment", "sat_adjustment",
+                                       "sun_adjustment", "duration_adjustment", "pause_adjustment"))
         builder.connect_signals(handlers)
 
         self._main_window = builder.get_object("main_app_window")
         self._users_list_store = builder.get_object("users_list_store")
         self._sessions_main_box = builder.get_object("sessions_main_box")
         self._init_users()
+        self._config = get_config()
 
     def _init_users(self):
         users_list = get_users_list()
         for u in users_list:
             self._users_list_store.append([u])
 
-    def on_settings(self, item):
-        self._main_window.show()
+    def on_user_changed(self, box: Gtk.ComboBox):
+        user = box.get_active_id()
+        if user in self._config:
+            print(self._config.get(user))
 
     def on_user_switch_state(self, switch, state):
         self._sessions_main_box.set_sensitive(state)
@@ -110,7 +116,6 @@ class StatusIcon:
 
     @staticmethod
     def on_settings(item):
-        LockWindow().show()
         MainAppWindow().show()
 
     @staticmethod
