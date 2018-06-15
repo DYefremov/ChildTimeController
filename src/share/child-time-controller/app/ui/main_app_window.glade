@@ -246,7 +246,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSwitch" id="switch">
+              <object class="GtkSwitch" id="auto_start_switch">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <signal name="state-set" handler="on_user_switch_state" swapped="no"/>

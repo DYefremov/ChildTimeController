@@ -5,7 +5,7 @@ import time
 from threading import Thread
 
 from . import Gtk
-from ..service.settings import get_config, get_users_list
+from ..service.commons import get_config, get_users_list, get_default_config, Day, run_idle, User
 
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/child-time-controller/app/ui/"
 
@@ -27,6 +27,12 @@ class MainAppWindow:
         self._main_window = builder.get_object("main_app_window")
         self._users_list_store = builder.get_object("users_list_store")
         self._sessions_main_box = builder.get_object("sessions_main_box")
+        self._auto_start_switch = builder.get_object("auto_start_switch")
+        self._duration_spin_button = builder.get_object("duration_spin_button")
+        self._pause_spin_button = builder.get_object("pause_spin_button")
+        self._days = {k.name: builder.get_object(str(k.name).lower() + "_check_button") for k in Day}
+        self._days_values = {k.name: builder.get_object(str(k.name).lower() + "_spin_button") for k in Day}
+
         self._init_users()
         self._config = get_config()
 
@@ -35,10 +41,18 @@ class MainAppWindow:
         for u in users_list:
             self._users_list_store.append([u])
 
+    @run_idle
     def on_user_changed(self, box: Gtk.ComboBox):
-        user = box.get_active_id()
-        if user in self._config:
-            print(self._config.get(user))
+        user_name = box.get_active_id()
+        user = User(*self._config[user_name]) if user_name in self._config else get_default_config(user_name)[user_name]
+        self._auto_start_switch.set_active(user.auto_start)
+
+        for d in user.active_days:
+            self._days.get(d[0]).set_active(True)
+            self._days_values.get(d[0]).set_value(d[1])
+
+        self._duration_spin_button.set_value(user.session_duration)
+        self._pause_spin_button.set_value(user.timeout)
 
     def on_user_switch_state(self, switch, state):
         self._sessions_main_box.set_sensitive(state)
