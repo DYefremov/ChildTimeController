@@ -5,7 +5,8 @@ import time
 from threading import Thread
 
 from . import Gtk
-from ..service.commons import get_config, get_users_list, get_default_config, Day, run_idle, User
+from ..service.commons import get_config, get_users_list, get_default_config, Day, run_idle, User, ActiveDay, \
+    write_config
 
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/child-time-controller/app/ui/"
 
@@ -15,6 +16,7 @@ class MainAppWindow:
     def __init__(self):
         handlers = {"on_user_switch_state": self.on_user_switch_state,
                     "on_user_changed": self.on_user_changed,
+                    "on_save": self.on_save,
                     "on_close_window": self.on_close}
 
         builder = Gtk.Builder()
@@ -26,6 +28,7 @@ class MainAppWindow:
 
         self._main_window = builder.get_object("main_app_window")
         self._users_list_store = builder.get_object("users_list_store")
+        self._user_combo_box = builder.get_object("user_combo_box")
         self._sessions_main_box = builder.get_object("sessions_main_box")
         self._auto_start_switch = builder.get_object("auto_start_switch")
         self._duration_spin_button = builder.get_object("duration_spin_button")
@@ -36,10 +39,12 @@ class MainAppWindow:
         self._init_users()
         self._config = get_config()
 
+    @run_idle
     def _init_users(self):
         users_list = get_users_list()
         for u in users_list:
             self._users_list_store.append([u])
+        self._user_combo_box.set_active(0)
 
     @run_idle
     def on_user_changed(self, box: Gtk.ComboBox):
@@ -53,6 +58,18 @@ class MainAppWindow:
 
         self._duration_spin_button.set_value(user.session_duration)
         self._pause_spin_button.set_value(user.timeout)
+
+    def on_save(self, item):
+        user_name = self._user_combo_box.get_active_id()
+        days = [ActiveDay(d.get_label(), self._days_values.get(d.get_label()).get_value()) for d in self._days.values()
+                if d.get_active()]
+
+        self._config[user_name] = User(name=user_name,
+                                       active_days=days,
+                                       session_duration=self._duration_spin_button.get_value(),
+                                       timeout=self._pause_spin_button.get_value(),
+                                       auto_start=self._auto_start_switch.get_active())
+        write_config(self._config)
 
     def on_user_switch_state(self, switch, state):
         self._sessions_main_box.set_sensitive(state)

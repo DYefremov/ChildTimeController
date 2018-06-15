@@ -90,8 +90,7 @@ def reset_config():
         json.dump(get_default_config(), default_config_file)
 
 
-def write_config(config):
-    assert isinstance(config, dict)
+def write_config(config: dict):
     with open(Constants.CONFIG_FILE.value, "w") as config_file:
         json.dump(config, config_file)
 

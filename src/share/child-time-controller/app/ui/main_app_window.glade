@@ -594,6 +594,7 @@
             <property name="margin_bottom">5</property>
             <property name="use_stock">True</property>
             <property name="always_show_image">True</property>
+            <signal name="clicked" handler="on_save" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
