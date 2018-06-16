@@ -90,11 +90,16 @@ class LockWindow:
         builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade", ("lock_window",))
         builder.connect_signals(handlers)
         self._window = builder.get_object("lock_window")
+        self._level_bar = builder.get_object("level_bar")
 
     @run_idle
-    def show(self):
+    def show(self, duration=None):
         print("Locked!")
+        self._window.fullscreen()
         self._window.show()
+        self._level_bar.set_max_value(1)
+        if duration:
+            Thread(target=self.show_duration, args=(duration,), daemon=True).start()
 
     @run_idle
     def hide(self):
@@ -103,6 +108,21 @@ class LockWindow:
 
     def on_lock_exit(self, *args):
         self._window.destroy()
+
+    def show_duration(self, duration):
+        self._level_bar.set_max_value(duration)
+        updater = self.update_level_bar()
+        next(updater)
+        while duration > 0:
+            updater.send(duration)
+            duration -= 1
+        updater.close()
+
+    def update_level_bar(self):
+        while True:
+            value = yield
+            self._level_bar.set_value(value)
+            time.sleep(1)
 
 
 class StatusIcon:
@@ -165,7 +185,7 @@ class StatusIcon:
             full_time -= 1
             consumed += 1
             if consumed > duration:
-                self.lock()
+                self.lock(duration)
                 time.sleep(timeout)
                 full_time -= timeout - 1
                 consumed = 0
@@ -179,8 +199,8 @@ class StatusIcon:
         self.lock()
 
     @run_idle
-    def lock(self):
-        self._lock_window.show()
+    def lock(self, duration=None):
+        self._lock_window.show(duration)
 
     @run_idle
     def unlock(self):
