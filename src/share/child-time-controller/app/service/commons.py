@@ -97,9 +97,13 @@ def write_config(config: dict):
 
 def get_default_config(user_name=None):
     if user_name is None:
-        user_name = pwd.getpwuid(os.geteuid()).pw_name
+        user_name = get_current_user_name()
 
-    return {user_name: User(user_name, [ActiveDay(Day(i).name, 2) for i in range(7)], 30, 15, False)}
+    return {user_name: User(user_name, [ActiveDay(Day(i).name, 120) for i in range(7)], 30, 15, False)}
+
+
+def get_current_user_name():
+    return pwd.getpwuid(os.geteuid()).pw_name
 
 
 def get_users_list():

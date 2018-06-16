@@ -1,4 +1,4 @@
-import concurrent.futures
+import datetime
 import os
 import time
 
@@ -6,7 +6,7 @@ from threading import Thread
 
 from . import Gtk
 from ..service.commons import get_config, get_users_list, get_default_config, Day, run_idle, User, ActiveDay, \
-    write_config
+    write_config, get_current_user_name
 
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/child-time-controller/app/ui/"
 
@@ -91,8 +91,15 @@ class LockWindow:
         builder.connect_signals(handlers)
         self._window = builder.get_object("lock_window")
 
+    @run_idle
     def show(self):
+        print("Locked!")
         self._window.show()
+
+    @run_idle
+    def hide(self):
+        print("Unlocked!")
+        self._window.hide()
 
     def on_lock_exit(self, *args):
         self._window.destroy()
@@ -109,41 +116,75 @@ class StatusIcon:
         builder = Gtk.Builder()
         builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade", ("status_icon", "status_icon_menu"))
         builder.connect_signals(handlers)
+        self._lock_window = LockWindow()
 
         self._status_icon = builder.get_object("status_icon")
 
+    @run_idle
     def start_service(self):
         if self._task_active:
             return
 
-        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
-            self._task_active = True
-            text = "Processing: {}\n"
-            futures = {executor.submit(self.do_task, text)}
-            for future in concurrent.futures.as_completed(futures):
-                if not self._task_active:
-                    executor.shutdown()
-                    return
+        config = get_config()
+        user_name = get_current_user_name()
+        user = config.get(user_name, None)
 
-            self._task_active = False
+        if not user:
+            return
+
+        user = User(*user)
+        if not user.auto_start:
+            return
+
+        current_day = Day(datetime.datetime.now().weekday()).name
+        active_day = list(filter(lambda d: d[0] == current_day, user.active_days))
+        if not active_day:
+            return
+
+        Thread(target=self.do_task, args=(active_day[0][1], user.session_duration, user.timeout)).start()
 
     def show(self):
-        Thread(target=self.start_service, daemon=True).start()
+        self.start_service()
         Gtk.main()
 
+    @run_idle
     def on_exit(self, item):
         self._task_active = False
+        self._lock_window.on_lock_exit()
         Gtk.main_quit()
 
-    def do_task(self, message: str):
-        counter = 2
-        while True:
-            counter -= 1
-            print(message.format(counter))
+    def do_task(self, full_time: int, duration: int, timeout: int):
+        """ Test!!! """
+        self._task_active = True
+        print("Started")
+
+        consumed = 0
+        full_time, duration, timeout = int(full_time), int(duration), int(timeout)
+
+        while self._task_active and full_time > 0:
+            full_time -= 1
+            consumed += 1
+            if consumed > duration:
+                self.lock()
+                time.sleep(timeout)
+                full_time -= timeout - 1
+                consumed = 0
+
+                if full_time:
+                    self.unlock()
+
             time.sleep(1)
-            if counter == 0:
-                self.show_lock()
-                break
+            print(full_time)
+
+        self.lock()
+
+    @run_idle
+    def lock(self):
+        self._lock_window.show()
+
+    @run_idle
+    def unlock(self):
+        self._lock_window.hide()
 
     @staticmethod
     def on_settings(item):
@@ -152,10 +193,6 @@ class StatusIcon:
     @staticmethod
     def on_status_icon_popup_menu(menu, event_button, event_time):
         menu.popup(None, None, None, menu, event_button, event_time)
-
-    @staticmethod
-    def show_lock():
-        print("Done!!!")
 
 
 def start_app():
