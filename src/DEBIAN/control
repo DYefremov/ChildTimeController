@@ -1,0 +1,9 @@
+Package: ChildTimeController
+Version: 0.1 Pre-alpha
+Section: utils
+Priority: optional
+Architecture: all
+Essential: no
+Depends: python3 (>= 3.5)
+Maintainer: Dmitriy Yefremov <dmitry.v.yefremov@gmail.com>
+Description: A simple application to limit the time spent by your children on the PC.

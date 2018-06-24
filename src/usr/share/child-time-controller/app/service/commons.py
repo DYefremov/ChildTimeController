@@ -2,11 +2,12 @@ import json
 import os
 import pwd
 import logging
+import time
 
 from collections import namedtuple
 from enum import Enum
 from functools import wraps
-from subprocess import getoutput
+from logging.handlers import TimedRotatingFileHandler
 
 from gi.repository import GLib
 
@@ -33,44 +34,54 @@ class Day(Enum):
 
 # ******************** Logger ******************** #
 
-LOG_FILE = "/home/dimon/log.log"
-DATE_FORMAT = "%d-%m-%y %H:%M:%S %w"  # 'w' is current day (0-6)
-
-logging.Logger("main_logger")
-logging.basicConfig(level=logging.INFO,
-                    filename=LOG_FILE,
-                    # format="%(asctime)s %(message)s",
-                    format="%(message)s",
-                    datefmt=DATE_FORMAT)
+_LOG_FILE = "time_controller.log"
+_DATE_FORMAT = "%d-%m-%y %H:%M:%S %w"  # 'w' is current day (0-6)
 
 
-def get_logger():
-    return logging.getLogger("main_logger")
+class ExtTimedRotatingFileHandler(TimedRotatingFileHandler):
+    def doRollover(self):
+        """ """
+        if self.stream:
+            self.stream.close()
+            self.stream = None
+        current_time = int(time.time())
+        if os.path.exists(self.baseFilename):
+            os.remove(self.baseFilename)
+
+        if not self.delay:
+            self.stream = self._open()
+        new_rollover_at = self.computeRollover(current_time)
+        while new_rollover_at <= current_time:
+            new_rollover_at = new_rollover_at + self.interval
+        self.rolloverAt = new_rollover_at
+
+    def set_interval(self, interval):
+        self.interval = interval
 
 
-def open_log():
-    with open(LOG_FILE) as file:
-        lines = file.readlines()
-        for line in lines:
-            print(line)
+def get_logger(when="m", interval=1):
+    logging.basicConfig(level=logging.INFO,
+                        # filename=_LOG_FILE,
+                        # format="%(asctime)s %(message)s",
+                        format="%(message)s",
+                        datefmt=_DATE_FORMAT)
+    log = logging.getLogger("main_logger")
+    log.setLevel(logging.INFO)
+    handler = ExtTimedRotatingFileHandler(_LOG_FILE, backupCount=0, when=when, interval=interval)
+    log.addHandler(handler)
+
+    return log
 
 
-def log_login():
-    """
-    Used to redirect logs from 'last'.
+def get_before_consumed(user_name, active_day):
+    def get_value(val):
+        data = val.split(":")
+        return data and user_name == data[0] and active_day == active_day
 
-    It is necessary because wtmp can be in tmpfs (as at me).
-    """
-    logger = get_logger()
-    with open(LOG_FILE) as file:
-        lines = set(file.readlines())
-    # logger.info(pwd.getpwuid(os.geteuid()).pw_name)
-    out = getoutput("last -R").splitlines()
-    sep = str("(")
-    end = "\n"
-    for line in out:
-        if line + end not in lines and sep in line:
-            logger.info(line)
+    with open(_LOG_FILE) as file:
+        values = list(filter(get_value, file.readlines()))
+
+        return int(max(map(lambda x: int(x.split(":")[2]), values))) if values else 0
 
 
 # ******************** Config ******************** #
@@ -125,19 +136,6 @@ def run_idle(func):
         GLib.idle_add(func, *args, **kwargs)
 
     return wrapper
-
-
-def is_in_file(f, text):
-    return any(text in line for line in f)
-
-
-def is_user_in_list(*args):
-    """"
-       Checking the need for logging for this user(s).
-
-        Need implementation.!!!
-       """
-    return True
 
 
 # ******************** # ******************** #

@@ -4,9 +4,11 @@ import time
 
 from threading import Thread
 
+from gi.repository import GLib
+
 from . import Gtk
 from ..service.commons import get_config, get_users_list, get_default_config, Day, run_idle, User, ActiveDay, \
-    write_config, get_current_user_name
+    write_config, get_current_user_name, get_logger, get_before_consumed
 
 UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/child-time-controller/app/ui/"
 
@@ -17,13 +19,11 @@ class MainAppWindow:
         handlers = {"on_user_switch_state": self.on_user_switch_state,
                     "on_user_changed": self.on_user_changed,
                     "on_save": self.on_save,
+                    "on_about": self.on_about,
                     "on_close_window": self.on_close}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade",
-                                      ("main_app_window", "users_list_store", "mon_adjustment", "tue_adjustment",
-                                       "wed_adjustment", "thu_adjustment", "fri_adjustment", "sat_adjustment",
-                                       "sun_adjustment", "duration_adjustment", "pause_adjustment"))
+        builder.add_from_file(UI_RESOURCES_PATH + "main_app_window.glade")
         builder.connect_signals(handlers)
 
         self._main_window = builder.get_object("main_app_window")
@@ -80,14 +80,24 @@ class MainAppWindow:
     def on_close(self, window, event):
         self._main_window.destroy()
 
+    def on_about(self, item):
+        builder = Gtk.Builder()
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("about_dialog",))
+        dialog = builder.get_object("about_dialog")
+        dialog.set_transient_for(self._main_window)
+        dialog.run()
+        dialog.destroy()
+
 
 class LockWindow:
+
+    _update_bar_interval = 5
 
     def __init__(self):
         handlers = {"on_lock_exit": self.on_lock_exit}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade", ("lock_window",))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("lock_window",))
         builder.connect_signals(handlers)
         self._window = builder.get_object("lock_window")
         self._level_bar = builder.get_object("level_bar")
@@ -97,9 +107,14 @@ class LockWindow:
         print("Locked!")
         self._window.fullscreen()
         self._window.show()
-        self._level_bar.set_max_value(1)
+        self.init_level_bar(duration)
         if duration:
-            Thread(target=self.show_duration, args=(duration,), daemon=True).start()
+            self.show_duration(duration)
+
+    def init_level_bar(self, duration):
+        value = duration if duration else 1
+        self._level_bar.set_max_value(value)
+        self._level_bar.set_value(value)
 
     @run_idle
     def hide(self):
@@ -110,19 +125,16 @@ class LockWindow:
         self._window.destroy()
 
     def show_duration(self, duration):
-        self._level_bar.set_max_value(duration)
-        updater = self.update_level_bar()
-        next(updater)
-        while duration > 0:
-            updater.send(duration)
-            duration -= 1
-        updater.close()
+        if duration < 1:
+            return
 
-    def update_level_bar(self):
-        while True:
-            value = yield
-            self._level_bar.set_value(value)
-            time.sleep(1)
+        def update_bar_value():
+            nonlocal duration
+            duration -= self._update_bar_interval
+            self._level_bar.set_value(duration)
+            return duration > 0
+
+        GLib.timeout_add_seconds(self._update_bar_interval, update_bar_value)
 
 
 class StatusIcon:
@@ -134,11 +146,17 @@ class StatusIcon:
                     "on_status_icon_popup_menu": self.on_status_icon_popup_menu}
 
         builder = Gtk.Builder()
-        builder.add_objects_from_file(UI_RESOURCES_PATH + "main_app_window.glade", ("status_icon", "status_icon_menu"))
+        builder.add_objects_from_file(UI_RESOURCES_PATH + "dialogs.glade", ("status_icon", "status_icon_menu"))
         builder.connect_signals(handlers)
-        self._lock_window = LockWindow()
-
         self._status_icon = builder.get_object("status_icon")
+        self._lock_window = LockWindow()
+        self._full_time = 0
+        self._duration = 0
+        self._timeout = 0
+        self._total_consumed = 0
+        self._current_day = Day.Mon.value
+        self._current_user = ""
+        self._logger = get_logger("m", 120)
 
     @run_idle
     def start_service(self):
@@ -146,8 +164,8 @@ class StatusIcon:
             return
 
         config = get_config()
-        user_name = get_current_user_name()
-        user = config.get(user_name, None)
+        self._current_user = get_current_user_name()
+        user = config.get(self._current_user, None)
 
         if not user:
             return
@@ -156,12 +174,24 @@ class StatusIcon:
         if not user.auto_start:
             return
 
-        current_day = Day(datetime.datetime.now().weekday()).name
-        active_day = list(filter(lambda d: d[0] == current_day, user.active_days))
+        self._current_day = Day(datetime.datetime.now().weekday()).name
+        active_day = list(filter(lambda d: d[0] == self._current_day, user.active_days))
         if not active_day:
             return
 
-        Thread(target=self.do_task, args=(active_day[0][1], user.session_duration, user.timeout)).start()
+        self._full_time = int(active_day[0][1])
+        self._duration = int(user.session_duration)
+        self._timeout = int(user.timeout)
+        self._total_consumed = get_before_consumed(self._current_user, active_day)
+
+        if self._total_consumed >= self._full_time:
+            Thread(target=self.lock_with_timeout, args=(None, 5), daemon=True).start()
+            return
+        else:
+            self._task_active = True
+            # We set how often the log file will be rewritten
+            self._logger.handlers[0].set_interval(self._duration)
+            Thread(target=self.do_task, daemon=True).start()
 
     def show(self):
         self.start_service()
@@ -173,34 +203,32 @@ class StatusIcon:
         self._lock_window.on_lock_exit()
         Gtk.main_quit()
 
-    def do_task(self, full_time: int, duration: int, timeout: int):
+    def do_task(self):
         """ Test!!! """
-        self._task_active = True
-        print("Started")
-
         consumed = 0
-        full_time, duration, timeout = int(full_time), int(duration), int(timeout)
-
-        while self._task_active and full_time > 0:
-            full_time -= 1
+        while self._task_active and self._total_consumed < self._full_time:
             consumed += 1
-            if consumed > duration:
-                self.lock(duration)
-                time.sleep(timeout)
-                full_time -= timeout - 1
+            if consumed > self._duration:
+                self.lock(self._timeout * 60)
+                time.sleep(self._timeout * 60)
                 consumed = 0
-
-                if full_time:
+                if self._total_consumed < self._full_time:
                     self.unlock()
 
-            time.sleep(1)
-            print(full_time)
+            self._total_consumed += 1
+            self._logger.info("{}:{}:{}".format(self._current_user, self._current_day, self._total_consumed))
+            time.sleep(60)
 
         self.lock()
 
     @run_idle
     def lock(self, duration=None):
         self._lock_window.show(duration)
+
+    def lock_with_timeout(self, duration=None, timeout=None):
+        if timeout:
+            time.sleep(timeout)
+        self.lock(duration)
 
     @run_idle
     def unlock(self):

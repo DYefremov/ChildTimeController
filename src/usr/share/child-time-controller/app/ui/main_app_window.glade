@@ -1,39 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.19.0 -->
 <interface>
-  <requires lib="gtk+" version="3.16"/>
-  <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <property name="program_name">ChildTimeController</property>
-    <property name="version">0.1</property>
-    <property name="copyright" translatable="yes">Dmitriy Yefremov 2018</property>
-    <property name="website">https://github.com/DYefremov/ChildTimeController</property>
-    <property name="authors">Dmitriy Yefremov</property>
-    <property name="logo_icon_name">face-monkey</property>
-    <property name="license_type">gpl-3-0</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="about_dialog_vbox">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="about_dialog_action_area">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
-  </object>
+  <requires lib="gtk+" version="3.14"/>
   <object class="GtkAdjustment" id="duration_adjustment">
     <property name="upper">60</property>
     <property name="step_increment">1</property>
@@ -45,93 +13,17 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkApplicationWindow" id="lock_window">
+  <object class="GtkMenu" id="header_right_menu">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="modal">True</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="skip_pager_hint">True</property>
-    <property name="decorated">False</property>
-    <signal name="delete-event" handler="on_lock_exit" swapped="no"/>
     <child>
-      <object class="GtkBox" id="main_lock_box">
+      <object class="GtkImageMenuItem" id="about_menu_item">
+        <property name="label">gtk-about</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">center</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkImage" id="lock_image">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="valign">center</property>
-            <property name="pixel_size">400</property>
-            <property name="icon_name">face-crying</property>
-            <property name="icon_size">0</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="lock_window_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes"> GAME OVER!</property>
-            <property name="justify">center</property>
-            <property name="lines">0</property>
-            <attributes>
-              <attribute name="size" value="18000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLevelBar" id="level_bar">
-            <property name="width_request">120</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="value">1</property>
-            <property name="inverted">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="lock_exit_button">
-            <property name="label">gtk-quit</property>
-            <property name="width_request">150</property>
-            <property name="height_request">48</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">center</property>
-            <property name="margin_top">32</property>
-            <property name="margin_bottom">32</property>
-            <property name="use_stock">True</property>
-            <property name="always_show_image">True</property>
-            <signal name="clicked" handler="on_lock_exit" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="on_about" swapped="no"/>
       </object>
     </child>
   </object>
@@ -149,40 +41,6 @@
     <property name="upper">1440</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-  </object>
-  <object class="GtkStatusIcon" id="status_icon">
-    <property name="icon_name">face-monkey</property>
-    <signal name="popup-menu" handler="on_status_icon_popup_menu" object="status_icon_menu" swapped="no"/>
-  </object>
-  <object class="GtkMenu" id="status_icon_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="settings_menu_item">
-        <property name="label">gtk-edit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_settings" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="separator_menu_item">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="exit_menu_item">
-        <property name="label">gtk-quit</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">True</property>
-        <signal name="activate" handler="on_exit" swapped="no"/>
-      </object>
-    </child>
   </object>
   <object class="GtkAdjustment" id="sun_adjustment">
     <property name="upper">1440</property>
@@ -294,13 +152,12 @@
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can_focus">False</property>
-            <property name="spacing">2</property>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkFrame" id="days_frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
                 <property name="margin_top">2</property>
                 <property name="margin_bottom">2</property>
                 <property name="label_xalign">0</property>
@@ -315,18 +172,73 @@
                     <property name="row_spacing">2</property>
                     <property name="column_spacing">5</property>
                     <child>
-                      <object class="GtkCheckButton" id="mon_check_button">
-                        <property name="label" translatable="yes">Mon</property>
+                      <object class="GtkCheckButton" id="sun_check_button">
+                        <property name="label" translatable="yes">Sun</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="halign">center</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="top_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="sat_check_button">
+                        <property name="label" translatable="yes">Sat</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="fri_check_button">
+                        <property name="label" translatable="yes">Fri</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="thu_check_button">
+                        <property name="label" translatable="yes">Thu</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="wed_check_button">
+                        <property name="label" translatable="yes">Wed</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -335,13 +247,110 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="halign">center</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="mon_check_button">
+                        <property name="label" translatable="yes">Mon</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="sun_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">sun_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="sat_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">sat_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="fri_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">fri_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="thu_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">thu_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="wed_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">wed_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="tue_spin_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="xalign">1</property>
+                        <property name="primary_icon_name">appointment-soon</property>
+                        <property name="adjustment">tue_adjustment</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -358,166 +367,30 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="tue_spin_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">tue_adjustment</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="wed_spin_button">
+                      <object class="GtkLabel" id="label1">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">wed_adjustment</property>
-                        <property name="numeric">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Total duration, min:</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="thu_spin_button">
+                      <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">thu_adjustment</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="fri_spin_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">fri_adjustment</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="sat_spin_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">sat_adjustment</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="sun_spin_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="xalign">1</property>
-                        <property name="primary_icon_name">appointment-soon</property>
-                        <property name="adjustment">sun_adjustment</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="wed_check_button">
-                        <property name="label" translatable="yes">Wed</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="icon_name">system-lock-screen</property>
+                        <property name="icon_size">1</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="thu_check_button">
-                        <property name="label" translatable="yes">Thu</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="fri_check_button">
-                        <property name="label" translatable="yes">Fri</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="sat_check_button">
-                        <property name="label" translatable="yes">Sat</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="sun_check_button">
-                        <property name="label" translatable="yes">Sun</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="halign">center</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">6</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                   </object>
@@ -543,7 +416,6 @@
               <object class="GtkFrame" id="sessions_frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
                 <property name="margin_right">5</property>
                 <property name="margin_top">2</property>
                 <property name="margin_bottom">2</property>
@@ -562,7 +434,8 @@
                       <object class="GtkLabel" id="max_session_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Max. session duration:</property>
+                        <property name="margin_left">2</property>
+                        <property name="label" translatable="yes">Max. session duration, min:</property>
                         <property name="xalign">0</property>
                       </object>
                       <packing>
@@ -574,7 +447,8 @@
                       <object class="GtkLabel" id="pause_session_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Pause between sessions:</property>
+                        <property name="margin_left">2</property>
+                        <property name="label" translatable="yes">Pause between sessions, min:</property>
                         <property name="xalign">0</property>
                       </object>
                       <packing>
@@ -665,7 +539,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="title">ChildTimeController</property>
-        <property name="subtitle">Management of users sessions duration</property>
+        <property name="subtitle">Management of user sessions duration</property>
         <property name="spacing">2</property>
         <property name="show_close_button">True</property>
         <child>
@@ -673,7 +547,9 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="popup">header_right_menu</property>
             <property name="direction">none</property>
+            <property name="use_popover">False</property>
             <child>
               <placeholder/>
             </child>
