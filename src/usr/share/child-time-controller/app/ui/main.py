@@ -14,6 +14,7 @@ UI_RESOURCES_PATH = "app/ui/" if os.path.exists("app/ui/") else "/usr/share/chil
 
 
 class MainAppWindow:
+    _AUTOSTART_ICON_TEXT = "\nX-MATE-Autostart-enabled=true\nX-GNOME-Autostart-enabled=true\n"
 
     def __init__(self):
         handlers = {"on_user_switch_state": self.on_user_switch_state,
@@ -64,12 +65,14 @@ class MainAppWindow:
         days = [ActiveDay(d.get_label(), self._days_values.get(d.get_label()).get_value()) for d in self._days.values()
                 if d.get_active()]
 
+        auto_start = self._auto_start_switch.get_active()
         self._config[user_name] = User(name=user_name,
                                        active_days=days,
                                        session_duration=self._duration_spin_button.get_value(),
                                        timeout=self._pause_spin_button.get_value(),
-                                       auto_start=self._auto_start_switch.get_active())
+                                       auto_start=auto_start)
         write_config(self._config)
+        self.set_auto_start(auto_start, user_name)
 
     def on_user_switch_state(self, switch, state):
         self._sessions_main_box.set_sensitive(state)
@@ -88,10 +91,21 @@ class MainAppWindow:
         dialog.run()
         dialog.destroy()
 
+    def set_auto_start(self, start, user_name):
+        icon_file_path = "/home/{}/.config/autostart/child-time-controller.desktop".format(user_name)
+        if start:
+            with open(icon_file_path, "w") as d_file:
+                with open("/usr/share/applications/child-time-controller.desktop", "r") as icon_file:
+                    lines = icon_file.readlines()
+                    lines.append(self._AUTOSTART_ICON_TEXT)
+                    d_file.writelines(lines)
+        else:
+            if os.path.exists(icon_file_path):
+                os.remove(icon_file_path)
+
 
 class LockWindow:
-
-    _update_bar_interval = 5
+    _UPDATE_BAR_INTERVAL = 5
 
     def __init__(self):
         handlers = {"on_lock_exit": self.on_lock_exit}
@@ -130,11 +144,11 @@ class LockWindow:
 
         def update_bar_value():
             nonlocal duration
-            duration -= self._update_bar_interval
+            duration -= self._UPDATE_BAR_INTERVAL
             self._level_bar.set_value(duration)
             return duration > 0
 
-        GLib.timeout_add_seconds(self._update_bar_interval, update_bar_value)
+        GLib.timeout_add_seconds(self._UPDATE_BAR_INTERVAL, update_bar_value)
 
 
 class StatusIcon:
